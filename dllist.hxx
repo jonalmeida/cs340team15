@@ -50,7 +50,10 @@
 #include <iterator>
 #include <limits>
 #include <initializer_list>
-
+#include <iostream>
+#include <cstdint>
+#include <cstddef>
+#include <iomanip>
 // Clearly you will need xorptr.hxx and I've provided it. Normally for
 // your own #include files you will use "" instead of <>.
 // NOTE:You should always write your own #include files after system ones.
@@ -129,13 +132,27 @@ public:
   explicit dllist_node_ptr_only(
     dllist_node_ptr_only* prev,
     dllist_node_ptr_only* next
-  );
+  )
+  {
+      xorptr_= prev ^ next;
+  }
+  // (DONE ;))
 
   // The following two constructors must initialize xorptr_ with xp passing
   // xp appropriately (i.e., an rvalue must be moved). No code is allowed
   // to appear within the braces of the constructor body.
-  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only> const& xp);
-  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only>&& xp);
+  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only> const& xp)
+  :xorptr_ (xp)
+  {
+
+  }
+  //(DONE ;))
+  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only>&& xp)
+  :xorptr_ (xp)
+  {
+
+  }
+  //(DONE ;))
 
   // It is common in C++ for classes to define a swap function to swap
   // *this and its argument (e.g., b here). Unless there is something
@@ -143,8 +160,9 @@ public:
   // swap functions simple invokes std::swap.
   void swap(dllist_node_ptr_only& b)
   {
-#error Write the code to swap xorptr_ with b.xorptr_ using std::swap here.
+ std::swap(xorptr_,b.xorptr_);
   }
+  //(DONE ;))
 
   // Handy casts...
   //
@@ -211,13 +229,15 @@ public:
   dllist_node_ptr_only* nextptr(dllist_node_ptr_only* prev)
   {
     // write the single line of code to compute the XOR of xorptr_ and prev
+	return xorptr_ ^ prev;
   }
-
+  //(DONE ;))
   dllist_node_ptr_only const* nextptr(dllist_node_ptr_only const* prev) const
   {
     // write the single line of code to compute the XOR of xorptr_ and prev
+	 return xorptr_ ^ prev;
   }
-
+  //(DONE ;))
   //
   // When one performs an insertion or removal of a node in a linked
   // list one needs to update the various nodes. Normally one simply
@@ -274,8 +294,9 @@ public:
     dllist_node_ptr_only* newptr
   )
   {
-    xorptr_ = /* compute (xorptr_ ^ oldptr ^ newptr) here as detailed above */
+    xorptr_ =(xorptr_ ^ oldptr ^ newptr);/* compute (xorptr_ ^ oldptr ^ newptr) here as detailed above */
   }
+  //(DONE ;))
 
 
   //
@@ -295,7 +316,7 @@ public:
   {
     xorptr_ = xorptr_type{ ptr1, ptr2 };
   }
-
+// (?// THE CODE IS ALREADY WRITTEN)
   //
   // Normally in a traditionally doubly-linked list, one might write
   // both an insert_before() and an insert_after() function for
@@ -437,45 +458,54 @@ public:
   //   1) "call" the parent type's constructor passing in two nullptr
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using copy construction.
-  explicit dllist_node(T const& datum);
+  explicit dllist_node(T const& datum, dllist_node* prev, dllist_node* next)):dllist_node_ptr_only(prev,next),datum_(std::copy(datum));
+  //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing in two nullptr
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using move construction.
-  explicit dllist_node(T&& datum);
+explicit dllist_node(T&& datum):dllist_node_ptr_only(nullptr,nullptr),datum_(std::move(datum))
+ //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing prev and next values.
   //   2) Initialize datum_ with datum using copy construction.
-  dllist_node(T const& datum, dllist_node* prev, dllist_node* next);
+  dllist_node(T const& datum, dllist_node* prev, dllist_node* next):dllist_node_ptr_only(prev,next),datum_(std::copy(datum))
+//(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing prev and next values.
   //   2) Initialize datum_ with datum using move construction.
-  dllist_node(T&& datum, dllist_node* prev, dllist_node* next);
+  dllist_node(T&& datum, dllist_node* prev, dllist_node* next):dllist_node_ptr_only(prev,next),datum_(std::move(datum))
+//(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values.
   //   2) Initialize datum_ with datum using copy construction.
-  dllist_node(T const& datum, xorptr_type const& xp);
+  dllist_node(T const& datum, xorptr_type const& xp):dllist_node_ptr_only(xp),datum_(std::copy(datum))
+  //(DONE ;))
+
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values.
   //   2) Initialize datum_ with datum using move construction.
-  dllist_node(T&& datum, xorptr_type const& xp)
+  dllist_node(T&& datum, xorptr_type const& xp):dllist_node_ptr_only(xp),datum_(std::move(datum))
+ //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values by moving
   //      it since it is being passed as an rvalue reference.
   //   2) Initialize datum_ with datum using move construction.
-  dllist_node(T&& datum, xorptr_type&& xp);
+  dllist_node(T&& datum, xorptr_type&& xp):dllist_node_ptr_only(std::move(xp)),datum_(std::move(datum))
+  //(DONE ;))
+
 
   // Move constructor...
   // No code can appear inside the next constructor's function body (braces).
@@ -483,7 +513,9 @@ public:
   //   1) "call" the parent type's constructor passing n values by moving
   //      it since it is being passed as an rvalue reference.
   //   2) Initialize datum_ with n's datum using move construction.
-  dllist_node(dllist_node&& n);
+  dllist_node(dllist_node&& n):dllist_node_ptr_only(std::move(n)),datum_(std::move(datum))
+//(DONE ;))
+
 
   // Move assignment...
   // Implement the move assignment operator as follows:
@@ -493,7 +525,11 @@ public:
   //            then specifying the move of n, followed by ");".
   //   2) Move assign n's datum_ value to this->datum_.
   //   3) As this is an assignment operator, remember to return *this.
-  dllist_node& operator =(dllist_node&& n);
+  dllist_node& operator =(dllist_node&& n):dllist_node_ptr_only::operator =(n),datum_(std::move(datum))
+    {
+        return *this;
+    }
+	//(DONE ;))
 
   // swap...
   // Do the following:
@@ -519,7 +555,8 @@ public:
   //
   //            LESSON: Sometimes it is good not to over-specify things.
   //
-  void swap(dllist_node& b);
+  void swap(dllist_node& b):dllist_node_ptr_only::swap(std::swap(b)),datum_(b->datum_)
+  //(DONE ;))
 
   //
   // "Getter" functions...
@@ -528,8 +565,14 @@ public:
   // datum() functions are exactly this. Each is a single line, returning
   // this->datum_. Write these.
   //
-  T& datum();
-  T const& datum() const;
+  T& datum()
+  {
+      return this->datum_;
+  }
+  T const& datum() const
+  {
+      return this->datum_;
+  }
 };
 
 //===========================================================================
@@ -729,7 +772,24 @@ public:
   //     // do write the catch clause here
   //   }
   //
-  ~dllist();
+  ~dllist()
+  {
+     while (!empty())
+     {
+         try
+         {
+             clear();
+         }catch (...)
+         {
+
+         }
+       // write try block here
+       // do call clear() from within the try block
+       // do write the catch clause here
+     }
+  }
+  //(DONE ;))
+
 
   //
   // Write dllist's copy assignment operator here by:
@@ -1050,11 +1110,21 @@ public:
   // NOTE: Now you should see why TWO sentinel nodes are needed with an
   //       XOR-encoded list.
   //
-  void push_front(value_type const& v);
+  void push_front(value_type const& v)
+  {
+      dllist_node<T>::insert(&back_,&front_,new(v));
+      size_++;
+
+  }
 
   // The next function is identical to the previous push_front() function
   // except that v is moved into the dllist_node<T> constructor.
-  void push_front(value_type&& v);
+  void push_front(value_type&& v)
+  {
+       dllist_node<T>::insert(&back_,&front_,v);
+      size_++;
+
+  }
 
   //
   // pop_front()
@@ -1069,7 +1139,12 @@ public:
   //      ASIDE: If you are paranoid, you can if (old != &back_) but this
   //             is unneeded as the precondition for pop_front() is
   //             empty() == false.
-  void pop_front();
+  void pop_front()
+  {
+      auto old=dllist_node<T>::remove(&back_,&front);
+      size_--;
+      old==nullptr;
+  }
 
   //
   // push_back(v)
@@ -1082,9 +1157,26 @@ public:
   //      &back_
   //   2) pop_back's remove call's arguments will be &front_ and &back_.
   //
-  void push_back(value_type const& v);
-  void push_back(value_type&& v);
-  void pop_back();
+  void push_back(value_type const& v)
+  {
+        dllist_node<T>::insert(&front_,&back_,v);
+       size_++;
+
+  }
+  //(DONE ;))
+  void push_back(value_type&& v)
+  {
+        dllist_node<T>::insert(&front_,&back_,v);
+       size_++;
+  }
+  //(DONE ;))
+
+  void pop_back()
+  {
+        dllist_node<T>::remove(&front_,&back);
+       size_--;
+  }
+  //(DONE ;))
 
   //
   // emplace(pos, args...)
@@ -1102,26 +1194,41 @@ public:
   //        newnode, nextnode as the constructor values.
   //
   template <typename... Args>
-  iterator emplace(iterator pos, Args&&... args);
+  iterator emplace(iterator pos, Args&&... args)
+  {
+      auto newnode = new dllist_node<T>{T(std::forward<Args>(args)...)};
+      auto nextnode = dllist_node<T>::insert(pos.prevptr_, pos.nodeptr_, newnode);
+      size_++;
+
+      //don tknow what he meant by c?
+
+  }
 
   // Implement the next SINGLE statement function as follows:
   //   1) Call this->emplace() with these arguments:
   //      a) begin() [i.e., add the new node at the start of the list]
   //      b) std::forward<Args>(args)...
   template <typename... Args>
-  void emplace_front(Args&&... args);
+  void emplace_front(Args&&... args)
+  {
+      this->emplace((), std::forward<Args>(args)...);
+  }
+  //(DONE ;))
 
   // Implement the next SINGLE statement function as follows:
   //   1) Call this->emplace() with these arguments:
   //      a) end() [i.e., add the new node at the start of the list]
   //      b) std::forward<Args>(args)...
   template <typename... Args>
-  void emplace_back(Args&&... args);
+  void emplace_front(Args&&... args)
+  {
+      this->emplace(end(), std::forward<Args>(args)...);
+  }
+  //(DONE ;))
 
   // This function is identical to emplace() except that args is replaced
   // with value and there is no std::forward or ... stuff.
   iterator insert(iterator pos, value_type const& value);
-
   // Implement the insert function as follows:
   //   1) Write a for loop to iterate through the range [first,last).
   //   2) Inside the for loop is the single line of code:
@@ -1129,7 +1236,15 @@ public:
   //         where *first is the variable you are iterating with.
   //         (You can use first --you don't need to make another variable.)
   template <typename InIter>
-  void insert(iterator pos, InIter first, InIter const& last);
+  void insert(iterator pos, InIter first, InIter const& last)
+  {
+
+      for (auto current=first,_e=last;first!=_e; ++current)
+      {
+          pos = insert(pos, *current);
+      }
+  }
+  //(DONE ;))
 
   // Implement erase() as follows...
   //   1) You need to --pos; to properly erase the desired node.
@@ -1138,14 +1253,31 @@ public:
   //   3) Deallocate the dynamically allocated memory in oldnode.
   //   4) Move pos back, i.e., ++pos;
   //   5) Return pos.
-  iterator erase(iterator pos);
+  iterator erase(iterator pos)
+  {
+      --pos;
+	  auto oldnode = dllist_node<T>::remove(pos.prevptr_, pos.nodeptr_);
+	  oldnode=nullptr;
+       ++pos;
+	   return pos;
+	  }
+
+	//(DONE ;))
 
   // Implement this erase() function as follows...
   //   1) Write a while loop with the test first != last.
   //      a) Inside the while loop, write "first = erase(first);"
   //   2) return first
-  iterator erase(iterator first, iterator const& last);
+  iterator erase(iterator first, iterator const& last)
+  {
+	  while(first!= last)
+	  {
+		 first = erase(first);
+	  }
+	  return first;
+  }
 };
+//(DONE ;))
 
 //===========================================================================
 
@@ -1160,7 +1292,12 @@ inline void swap(dllist<T>& a, dllist<T>& b)
 //   1) Write "using std::equal" (equal is in <algorithm>).
 //   2) return the result of calling equal().
 template <typename T>
-inline bool operator ==(dllist<T> const& a, dllist<T> const& b);
+inline bool operator ==(dllist<T> const& a, dllist<T> const& b)
+{
+	return std::equal(a, b);
+
+}
+//(DONE ;))
 
 // The next function is provided for you. Notice that it is wise to
 // simply call operator ==() here instead of writing "return !equal(..."...
@@ -1176,8 +1313,11 @@ inline bool operator !=(dllist<T> const& a, dllist<T> const& b)
 //   1) Write "using std::lexicographical_compare;" (which is in <algorithm>)
 //   2) return the result of calling lexicographical_compare().
 template <typename T>
-inline bool operator <(dllist<T> const& a, dllist<T> const& b);
-
+inline bool operator <(dllist<T> const& a, dllist<T> const& b)
+{
+	return std::lexicographical_compare;
+}
+//(DONE ;))
 // The next function is provided for you. It is defined per the ISO C++ 14
 // standard document...
 template <typename T>
@@ -1376,15 +1516,17 @@ public:
   //   If nodeptr_ is equal to i.nodeptr_ then the nodes are the same.
   bool operator ==(dllist_iter const& i) const
   {
-    return nodeptr_ == i.nodeptr_;
+      return nodeptr_==i.nodeptr_;
   }
+  //(DONE ;))
 
   // Implement the next function by calling operator ==(i) and
   // appropriately manipulating its result.
   bool operator !=(dllist_iter const& i) const
   {
-    return !operator ==(i);
+      return nodeptr_!==i.nodeptr_;
   }
+  //(DONE ;))
 
   // The next function has been implemented for you.
   // This is unary *, i.e., the indirection (pointer) operator.
