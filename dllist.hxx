@@ -1201,7 +1201,8 @@ public:
       size_++;
 
       //don tknow what he meant by c?
-
+      return iterator(newnode, nextnode);
+      //return nullptr;
   }
 
   // Implement the next SINGLE statement function as follows:
