@@ -9,7 +9,7 @@
 // compliant sequence container (for the operations defined herein)
 // that implements an XOR-encoded doubly-linked list.
 //
-// The xorptr.hxx header file is from the individual portion of the 
+// The xorptr.hxx header file is from the individual portion of the
 // project which each group member is required to do. Once such has been
 // handed-in, pool together your xorptr.hxx code and take the best of, or,
 // improve it (should there be bugs in the individual ones) if needed for
@@ -26,7 +26,7 @@
 // questions or for help when such is needed!
 //
 // While some preprocessor items may be missing from this file that you
-// need to add to it, the rest of the "prototyped" code is present and 
+// need to add to it, the rest of the "prototyped" code is present and
 // you must implement/fix all of that code. The content of this file
 // was based on real, correct code and the comments that appear in this
 // file were written based upon such. This was done to ensure everything
@@ -39,6 +39,8 @@
 //
 
 // YOU NEED SOMETHING HERE WRT THE PREPROCESSOR
+#ifndef DLLIST_HXX
+#define DLLIST_HXX
 
 //===========================================================================
 
@@ -66,16 +68,16 @@
 //
 // Forward declare types...
 //
-template <typename T> 
+template <typename T>
 class dllist_node;      // doubly-linked list node type
 
-template <typename T> 
+template <typename T>
 class dllist;           // doubly-linked list container type
 
-template <typename T> 
+template <typename T>
 class dllist_iter;      // doubly-linked list iterator type
 
-template <typename T> 
+template <typename T>
 class dllist_citer;     // doubly-linked list const_iterator type
 
 //===========================================================================
@@ -119,7 +121,7 @@ public:
   dllist_node_ptr_only& operator =(dllist_node_ptr_only&&) = default;
 
   // Items to write/do...
-  
+
   // The following constructor must take prev and next and construct an
   // xorptr_ instance. You must do this using the C++ constructor
   // initializer list syntax (i.e., using the : ... { syntax). There must
@@ -189,7 +191,7 @@ public:
   // XOR-encoded pointer manipulations...
   //
   // The nextptr(prev) function computes xorptr_ ^ prev and returns
-  // the result. While the single line of code in both functions 
+  // the result. While the single line of code in both functions
   // is identical, notice the difference in type in prev and in terms of
   // *this (i.e., the first *this is non-const and the second *this
   // is const). This will cause the various overloads defined in xorptr.hxx
@@ -203,24 +205,24 @@ public:
   //       node* nextptr(node* prevNode) { return prevNode->next; }
   //       node* prevptr(node* nextNode) { return nextNode->prev; }
   //
-  //       Why & how "both"? Answer: Re-examine how one traverses an 
+  //       Why & how "both"? Answer: Re-examine how one traverses an
   //       XOR-encoded list.
   //
   dllist_node_ptr_only* nextptr(dllist_node_ptr_only* prev)
   {
     // write the single line of code to compute the XOR of xorptr_ and prev
   }
-  
+
   dllist_node_ptr_only const* nextptr(dllist_node_ptr_only const* prev) const
   {
     // write the single line of code to compute the XOR of xorptr_ and prev
   }
-  
+
   //
   // When one performs an insertion or removal of a node in a linked
   // list one needs to update the various nodes. Normally one simply
   // assigns the required pointer(s) their new values and that is all.
-  // With an XOR-encoded linked list, the xorptr<T> values are 
+  // With an XOR-encoded linked list, the xorptr<T> values are
   // computed using the previous node's address and the next node's address.
   // This means to update an xorptr<T>, one has to "subtract" the old
   // value being updated and replace it with the new value being updated.
@@ -250,8 +252,8 @@ public:
   // xorptr_ ^ oldptr ^ newptr. The xorptr_ class was designed to be
   // as reasonably type-/use-safe as possible. This means that if one
   // computes the XOR-encoded pointer, xorptr_, then XORing a pointer,
-  // e.g., xorptr_ ^ oldptr, returns a normal pointer. (The safety 
-  // assumption is that one is XORing the correct pointer value with 
+  // e.g., xorptr_ ^ oldptr, returns a normal pointer. (The safety
+  // assumption is that one is XORing the correct pointer value with
   // xorptr_ so that the result is the correct pointer.)
   //
   // Since xorptr_ ^ oldptr returns a normal pointer, one cannot merely
@@ -268,17 +270,17 @@ public:
   //   - Remember to assign this->xorptr_ the result of the computation.
   //
   void updateptr(
-    dllist_node_ptr_only* oldptr, 
+    dllist_node_ptr_only* oldptr,
     dllist_node_ptr_only* newptr
   )
   {
     xorptr_ = /* compute (xorptr_ ^ oldptr ^ newptr) here as detailed above */
   }
-  
-  
+
+
   //
   // In dllist<T>::swap(dllist<T>&) you'll notice the code is (i) provided
-  // and (ii) is long. While strictly not necessary because 
+  // and (ii) is long. While strictly not necessary because
   // updateptr(oldptr, newptr) can be used to update an xorptr<T> value
   // if one wants to update BOTH pointer values stored in an xorptr<T>
   // the it is sometimes easier (and less computation) to provide
@@ -310,7 +312,7 @@ public:
   // things out. Once one understands that, then the code in this function
   // is straight-forward to understand and write.)
   //
-  // As this course is about C++ and related concepts and not data 
+  // As this course is about C++ and related concepts and not data
   // structures and algorithms, this code has been provided to you. The
   // comments should suffice to understand it fully.
   //
@@ -332,7 +334,7 @@ public:
     dllist_node_ptr_only* prev,
     dllist_node_ptr_only* before,
     dllist_node_ptr_only* new_node
-  ) 
+  )
   {
     // Insert newnext after this pointer as determined by prevptr...
     //    START: prev, before, oldnext, ...
@@ -354,11 +356,11 @@ public:
     return oldnext;
   }
 
-  // 
+  //
   // remove(prev, before) is a static function for the same reason
   // as insert(prev, before, new_node), i.e., to remove the node after
   // before, one needs the node previous to before (i.e., prev) to obtain
-  // the node after before --and to avoid confusion for the human 
+  // the node after before --and to avoid confusion for the human
   // programmer one writes the arguments in the order of list traversal. :-)
   //
   // Although one likely wants to delete the old node, that node might be
@@ -380,7 +382,7 @@ public:
     // Remove nextptr after this pointer as determined by prevptr.
     // For safety reasons, return the removed pointer so called
     // can delete it (since it can be a sentinel pointer).
-    //    START: prev, before, oldnext, newnext 
+    //    START: prev, before, oldnext, newnext
     //   RESULT: prev, before, newnext
 
     // Obtain oldnext (which will be deleted)...
@@ -447,40 +449,40 @@ public:
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing prev and next values.
-  //   2) Initialize datum_ with datum using copy construction.  
+  //   2) Initialize datum_ with datum using copy construction.
   dllist_node(T const& datum, dllist_node* prev, dllist_node* next);
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing prev and next values.
-  //   2) Initialize datum_ with datum using move construction.  
+  //   2) Initialize datum_ with datum using move construction.
   dllist_node(T&& datum, dllist_node* prev, dllist_node* next);
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values.
-  //   2) Initialize datum_ with datum using copy construction.  
+  //   2) Initialize datum_ with datum using copy construction.
   dllist_node(T const& datum, xorptr_type const& xp);
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values.
-  //   2) Initialize datum_ with datum using move construction.  
+  //   2) Initialize datum_ with datum using move construction.
   dllist_node(T&& datum, xorptr_type const& xp)
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values by moving
   //      it since it is being passed as an rvalue reference.
-  //   2) Initialize datum_ with datum using move construction.  
+  //   2) Initialize datum_ with datum using move construction.
   dllist_node(T&& datum, xorptr_type&& xp);
-  
+
   // Move constructor...
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing n values by moving
   //      it since it is being passed as an rvalue reference.
-  //   2) Initialize datum_ with n's datum using move construction.  
+  //   2) Initialize datum_ with n's datum using move construction.
   dllist_node(dllist_node&& n);
 
   // Move assignment...
@@ -499,16 +501,16 @@ public:
   //      HINT: In the move assignment above, you wrote the FULL name of the
   //            parent class' function to call it. You must do the same
   //            here. (In Java, you can use "super" to do this. In C++
-  //            there is no "super" since C++ supports multiple 
+  //            there is no "super" since C++ supports multiple
   //            inheritance (and what would "super" mean then?). Instead
   //            in C++, you write the full name of the parent class to
   //            "access" something in that class.)
   //   2) Write using std::swap;
   //   3) Now call swap to swap this->datum_ and b's datum_.
   //      NOTE: Step 2 should not be combined with step 3 here. C++ supports
-  //            something called ADL (argument dependent lookup). If 
+  //            something called ADL (argument dependent lookup). If
   //            type T is in some namespace N and T has a swap(T,T) function
-  //            defined in the N namespace, then the C++ compiler will 
+  //            defined in the N namespace, then the C++ compiler will
   //            find and use the N::swap(T,T). If you hard-code std:: in
   //            front of the swap call, then the C++ compiler will ONLY call
   //            std::swap(T,T) and not the more optimal N::swap(T,T).
@@ -546,8 +548,8 @@ inline void swap(dllist_node<T>& a, dllist_node<T>& b);
 //
 // dllist<T>
 //
-// The dllist<T> type is the xor-encoded doubly-linked list sequence 
-// container class. This type allows to store, erase, and access 
+// The dllist<T> type is the xor-encoded doubly-linked list sequence
+// container class. This type allows to store, erase, and access
 // elements stored within it not like std::vector<T>, std::list<T>, etc.
 //
 // IMPORTANT: The constructors and functions in this class are the same
@@ -625,7 +627,7 @@ public:
   //      c) value
   //
   // NOTE: The reason you can use back_inserter like this is because *this
-  //       is already fully constructed by first calling the dllist<T> 
+  //       is already fully constructed by first calling the dllist<T>
   //       default constructor!
   //
   // Notice that if value has a default value --a default constructed T!
@@ -679,7 +681,7 @@ public:
   //
   template <typename InIter>
   dllist(InIter const& first, InIter const& last);
-  
+
   //
   // copy constructor
   //
@@ -711,7 +713,7 @@ public:
   //
   // destructor
   //
-  // A destructor cleans things up but also must normally not be allowed to 
+  // A destructor cleans things up but also must normally not be allowed to
   // throw an exception. To clean up the nodes in the container, one
   // simply calls the clear() member function (defined below). That said,
   // the clear() function might throw exceptions if T's destructor is
@@ -732,7 +734,7 @@ public:
   //
   // Write dllist's copy assignment operator here by:
   //   1) Declaring a local variable called tmp of type dllist<T>.
-  //      Ensure this tmp variable's constructor is passed l to copy 
+  //      Ensure this tmp variable's constructor is passed l to copy
   //      construct tmp with l's contents.
   //   2) Now call this->swap() on tmp.
   //   3) As this is an assignment operator, remember to return *this.
@@ -749,7 +751,7 @@ public:
   // except you want to move construct tmp passing in l.
   dllist& operator =(dllist&& l);
 
-  // 
+  //
   // If you wrote:
   //
   //   dllist<int> l;
@@ -768,7 +770,7 @@ public:
   //
   // To implement the next function write:
   //   1) Create a local variable called tmp of type dllist<T> and invoke
-  //      the dllist<T> constructor appropriate for the arguments n and 
+  //      the dllist<T> constructor appropriate for the arguments n and
   //      value.
   //   2) Call this->swap() to swap *this and tmp.
   //
@@ -777,7 +779,7 @@ public:
   //
   // To implement the next function write:
   //   1) Create a local variable called tmp of type dllist<T> and invoke
-  //      the dllist<T> constructor appropriate for the arguments first and 
+  //      the dllist<T> constructor appropriate for the arguments first and
   //      last.
   //   2) Call this->swap() to swap *this and tmp.
   //
@@ -816,7 +818,7 @@ public:
   {
     return front_.nextptr(&back_)->to_node().datum();
   }
-  
+
   // The next function has been provided for you.
   // NOTE: The precondition to this function's use is empty() == false.
   reference back()
@@ -831,7 +833,7 @@ public:
     return back_.nextptr(&front_)->to_node().datum();
   }
 
-  // 
+  //
   // begin()
   //
   // This function is a SINGLE line of code! Simply construct an rvalue
@@ -856,7 +858,7 @@ public:
   //   2) &back_ (i.e., this is the "one-past-the-end" sentinel node)
   //
   iterator end();
-  
+
   //
   // begin() const
   //
@@ -872,9 +874,9 @@ public:
   // const_iterator instead (i.e., dllist_citer<T>).
   //
   const_iterator end() const;
-  
+
   // The next function has been provided for you.
-  // NOTE: Why risk error-prone typing? Simply call the appropriate 
+  // NOTE: Why risk error-prone typing? Simply call the appropriate
   //       function! :-)
   const_iterator cbegin() const
   {
@@ -882,7 +884,7 @@ public:
   }
 
   // The next function has been provided for you.
-  // NOTE: Why risk error-prone typing? Simply call the appropriate 
+  // NOTE: Why risk error-prone typing? Simply call the appropriate
   //       function! :-)
   const_iterator cend() const
   {
@@ -900,28 +902,28 @@ public:
   // std::reverse_iterator.
   //
   reverse_iterator rbegin();
-  
+
   //
   // rend() is just like rbegin() except that this->begin() is passed
   // to the std::reverse_iterator constructor instead. :-)
   //
   reverse_iterator rend();
-  
-  // 
+
+  //
   // rbegin() const is the same as rbegin() except the iterator
   // type is now const_reverse_iterator (i.e., dllist_citer<T>).
   //
   const_reverse_iterator rbegin() const;
-  
-  // 
+
+  //
   // rend() const is the same as rend() except the iterator
   // type is now const_reverse_iterator (i.e., dllist_citer<T>).
   //
   const_reverse_iterator rend() const;
-  
+
   // crbegin() const returns what begin() const returns.
   const_reverse_iterator crbegin() const;
-  
+
   // crend() const returns what end() const returns.
   const_reverse_iterator crend() const;
 
@@ -935,14 +937,14 @@ public:
   void clear();
 
   // The this->swap(l) function has been provided for you.
-  // To understand why all of this work is required to swap, read its 
+  // To understand why all of this work is required to swap, read its
   // comments.
   void swap(dllist& l)
   {
     //
     // Since &front_ and &back_ are hard-coded into the dllist nodes,
     // one must replace all &front_ with &l.front_ and all &back_
-    // with &l.back_ and vice versa. There are at most four nodes 
+    // with &l.back_ and vice versa. There are at most four nodes
     // with these values in each list:
     //
     //   1) front_ and l.front_
@@ -1049,12 +1051,12 @@ public:
   //       XOR-encoded list.
   //
   void push_front(value_type const& v);
-  
+
   // The next function is identical to the previous push_front() function
   // except that v is moved into the dllist_node<T> constructor.
   void push_front(value_type&& v);
 
-  // 
+  //
   // pop_front()
   //
   // Implement this THREE-STATEMENT function as follows:
@@ -1306,7 +1308,7 @@ inline auto crend(dllist<T> const& a)
 // non-const T iterator type (i.e., notice the returned T values are not
 // constant).
 //
-// This class does inherit from std::iterator which defines some type 
+// This class does inherit from std::iterator which defines some type
 // aliases needed to use this iterator with <algortihm> and other operations
 // in the ISO C++ standard.
 //
@@ -1322,10 +1324,10 @@ inline auto crend(dllist<T> const& a)
 template <typename T>
 class dllist_iter :
   public std::iterator<
-    std::bidirectional_iterator_tag, 
-    T, 
-    std::ptrdiff_t, 
-    T*, 
+    std::bidirectional_iterator_tag,
+    T,
+    std::ptrdiff_t,
+    T*,
     T&
   >
 {
@@ -1347,7 +1349,7 @@ public:
   //       and used though.
   dllist_iter() :
     prevptr_{nullptr},
-    nodeptr_{nullptr} 
+    nodeptr_{nullptr}
   {
   }
 
@@ -1372,11 +1374,17 @@ public:
 
   // Implement the next function computing:
   //   If nodeptr_ is equal to i.nodeptr_ then the nodes are the same.
-  bool operator ==(dllist_iter const& i) const;
+  bool operator ==(dllist_iter const& i) const
+  {
+    return nodeptr_ == i.nodeptr_;
+  }
 
-  // Implement the next function by calling operator ==(i) and 
+  // Implement the next function by calling operator ==(i) and
   // appropriately manipulating its result.
-  bool operator !=(dllist_iter const& i) const;
+  bool operator !=(dllist_iter const& i) const
+  {
+    return !operator ==(i);
+  }
 
   // The next function has been implemented for you.
   // This is unary *, i.e., the indirection (pointer) operator.
@@ -1404,14 +1412,26 @@ public:
   //   2) Assign prevptr_ to nodeptr_.
   //   3) Assign nodeptr_ to next_nodeptr_.
   //   4) return *this  [prefix ++ needs to return an lvalue reference]
-  dllist_iter& operator ++();
+  dllist_iter& operator ++()
+  {
+    auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
+    // This seems right vs. the instructions.
+    next_nodeptr_ = nodeptr_;
+    nodeptr_ = prevptr_;
+    return *this;
+  }
 
   // Implement postfix operator ++ in terms of prefix ++ as follows:
   //   1) Declare a local variable of type dllist_iter<T> passing *this
   //      to its constructor (i.e., copy construct).
   //   2) Call the PREFIX operator ++(). [Notice there is no int arg.]
   //   3) Return the local variable tmp.
-  dllist_iter operator ++(int);
+  dllist_iter operator ++(int)
+  {
+    dllist_iter<T> tmp{*this};
+    tmp++;
+    return tmp;
+  }
 
   // Implement the prefix operator -- as follows:
   //   1) Execute: auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
@@ -1419,11 +1439,20 @@ public:
   //   2) Assign nodeptr_ to prevptr_.
   //   3) Assign prevptr_ to prev_prevptr_.
   //   4) return *this  [prefix -- needs to return an lvalue reference]
-  dllist_iter& operator --();
+  dllist_iter& operator --() {
+    auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
+    prevptr_ = prev_prevptr_;
+    nodeptr_ = prevptr_;
+    return *this;
+  }
 
   // The postfix -- operator is implemented like postfix ++ operator
   // except you call the prefix operator --() instead.
-  dllist_iter operator --(int);
+  dllist_iter operator --(int) {
+    dllist_iter<T> tmp{*this};
+    tmp--;
+    return tmp;
+  }
 };
 
 //===========================================================================
@@ -1440,10 +1469,10 @@ public:
 template <typename T>
 class dllist_citer :
   public std::iterator<
-    std::bidirectional_iterator_tag, 
-    T const, 
-    std::ptrdiff_t, 
-    T const*, 
+    std::bidirectional_iterator_tag,
+    T const,
+    std::ptrdiff_t,
+    T const*,
     T const&
   >
 {
@@ -1456,7 +1485,7 @@ private:
 public:
   dllist_citer() :
     prevptr_{nullptr},
-    nodeptr_{nullptr} 
+    nodeptr_{nullptr}
   {
   }
 
@@ -1480,7 +1509,7 @@ public:
   // Provided for you... for dllist_iter<T> interoperability...
   // (This is based on a requirement by the standard.)
   dllist_citer(dllist_iter<T> const& i) :
-    nodeptr_{i.nodeptr_}, 
+    nodeptr_{i.nodeptr_},
     prevptr_{i.prevptr_}
   {
   }
@@ -1509,17 +1538,55 @@ public:
   }
 
   // Write the remaining functions...
-  bool operator ==(dllist_citer const& i) const;
-  bool operator !=(dllist_citer const& i) const;
+  bool operator ==(dllist_citer const& i) const
+  {
+    return operator ==(i);
+  }
+  bool operator !=(dllist_citer const& i) const
+  {
+    return operator !=(i);
+  }
 
-  T const& operator *() const;
-  T const* operator ->() const;
+  T const& operator *() const
+  {
+    return static_cast<T const&>(nodeptr_->to_node().datum());
+  }
+  T const* operator ->() const
+  {
+    return static_cast<T const*>(&nodeptr_->to_node().datum());
+  }
 
-  dllist_citer& operator ++();
-  dllist_citer operator ++(int);
+  dllist_citer& operator ++()
+  {
+    auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
+    next_nodeptr_ = nodeptr_;
+    nodeptr_ = prevptr_;
+    // TODO: Do I really need to do a static cast to this too?
+    return static_cast<dllist_citer&>(*this);
+    //return *this;
+  }
+  dllist_citer operator ++(int)
+  {
+    // TODO: Should I get a dllist_iter<T> and then later static_cast it
+    // before returning?
+    dllist_iter<T> tmp{*this};
+    tmp++;
+    return static_cast<dllist_citer<T>>(tmp);
+  }
 
-  dllist_citer& operator --();
-  dllist_citer operator --(int);
+  dllist_citer& operator --()
+  {
+    auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
+    prevptr_ = prev_prevptr_;
+    nodeptr_ = prevptr_;
+    return static_cast<dllist_citer&>(*this);
+  }
+  dllist_citer operator --(int)
+  {
+    dllist_iter<T> tmp{*this};
+    tmp--;
+    return static_cast<dllist_citer>(tmp);
+  }
 };
 
 //===========================================================================
@@ -1543,3 +1610,4 @@ inline bool operator !=(dllist_iter<T> const& i, dllist_citer<T> const& j)
 //===========================================================================
 
 // WRITE THE NEEDED PREPROCESSOR STATEMENT HERE!
+#endif
