@@ -54,6 +54,8 @@
 #include <cstdint>
 #include <cstddef>
 #include <iomanip>
+#include "xorptr.hxx"
+
 // Clearly you will need xorptr.hxx and I've provided it. Normally for
 // your own #include files you will use "" instead of <>.
 // NOTE:You should always write your own #include files after system ones.
@@ -653,9 +655,10 @@ public:
   //       declaration of back_ so it can pass the appropriate address
   //       in to initialize front_.
   //
-  dllist();
+  dllist(): size{}, front_{&back_, &back_}, back_{&front_, &front_}{}
 
-  //
+
+ //
   // constructor dllist(n, value)
   // This constructor will create a list of n nodes containing value as
   // their datum.
@@ -676,7 +679,11 @@ public:
   // Notice that if value has a default value --a default constructed T!
   // This is handy if you want a list of n default values. :-)
   //
-  dllist(size_type n, T const& value = T{});
+  dllist(size_type n, T const& value = T{}):
+	dllist{}
+  {
+	  std::fill_n(std::back_inserter(*this), n, value);
+  }
 
   //
   // constructor dllist(}{ ... })
@@ -702,9 +709,13 @@ public:
   //      a) il's begin and end values
   //      b) <iterator>'s back_inserter on *this.
   //
-  dllist(std::initializer_list<T> il);
+  dllist(std::initializer_list<T> il):
+	dllist{}
+  {
+	std::copy(li.begin(), li.end(), std::back_inserter(*this));
+  }
 
-  //
+//
   // constructor dllist(first, last)
   //
   // You can copy the values of one container/range into another:
@@ -723,7 +734,11 @@ public:
   //      b) <iterator>'s back_inserter on *this.
   //
   template <typename InIter>
-  dllist(InIter const& first, InIter const& last);
+  dllist(InIter const& first, InIter const& last):
+	dllist{}
+  {
+	std::copy(first, last, std::backinster(*this));
+  }
 
   //
   // copy constructor
@@ -736,7 +751,11 @@ public:
   //      a) l's begin and end, and,
   //      b) <iterator>'s back_inserter on *this.
   //
-  dllist(dllist const& l);
+  dllist(dllist const& l):
+	dllist{}
+  {
+	std::copy(l.begin(), l.end(), std::back_inserter(*this));
+  }
 
   //
   // move constructor
@@ -747,13 +766,14 @@ public:
   // Initialize the class as follows after the opening brace:
   //   2) Call swap(l) to swap l with *this. (swap() is defined below.)
   //
+
   dllist(dllist&& l) :
     dllist{}
   {
-    swap(l);
+    this->swap(l);
   }
 
-  //
+{ //
   // destructor
   //
   // A destructor cleans things up but also must normally not be allowed to
@@ -805,11 +825,23 @@ public:
   // for dllist<T>, then one is guaranteed that the state of *this will be
   // valid even if an exception is thrown.)
   //
-  dllist& operator =(dllist const& l);
+  dllist& operator =(dllist const& l)
+  {
+  dllist<T> tmp{l};
+	  this->swap(tmp);
+	  return *this;
+
+  }
+
 
   // Implement the move assignment operator per the copy assignment operator
   // except you want to move construct tmp passing in l.
-  dllist& operator =(dllist&& l);
+  dllist& operator =(dllist&& l)
+  {
+	  dllist<T> tmp{l};
+	  this->swap(tmp);
+	  return *this;
+  }
 
   //
   // If you wrote:
@@ -825,7 +857,11 @@ public:
   //      type is special to the compiler... just pass it in.)
   //   2) Call this->swap() to swap *this and tmp.
   //
-  void assign(std::initializer_list<T> il);
+  void assign(std::initializer_list<T> il)
+  {
+	  dllist<T> tmp{il};
+	  this->swap(tmp);
+  }
 
   //
   // To implement the next function write:
@@ -834,7 +870,11 @@ public:
   //      value.
   //   2) Call this->swap() to swap *this and tmp.
   //
-  void assign(size_type n, value_type const& value);
+  void assign(size_type n, value_type const& value)
+  {
+	  dllist<T> tmp{n, value};
+	  this->swap();
+  }
 
   //
   // To implement the next function write:
@@ -844,20 +884,30 @@ public:
   //   2) Call this->swap() to swap *this and tmp.
   //
   template <typename InIter>
-  void assign(InIter const& first, InIter const& last);
+  void assign(InIter const& first, InIter const& last)
+  {
+	  dllist<T> tmp{first, last};
+	  this->swap();
+  }
 
   //
   // To implement empty(), use the class member variable (look at the top
   // of this class!) to check whether or not there are elements.
   //
-  bool empty() const;
+  bool empty() const
+  {
+	  return !(size_ > 0);
+  }
 
   //
   // To implement size(), use the class member variable (look at the top
   // of this class!) to determine how many elements there are in this
   // container.
   //
-  size_type size() const;
+  size_type size() const
+  {
+	  return size_;
+  }
 
   // The next function has been provided for you.
   size_type max_size() const
@@ -904,7 +954,10 @@ public:
   //   1) &front_ (i.e., this is the "previous [sentinel] node",)
   //   2) front_.nextptr(&back_) (i.e., this is the "current node")
   //
-  iterator begin();
+  iterator begin()
+  {
+	return iterator( &front_, front.nextprt(&back_));
+  }
 
   //
   // end()
@@ -917,7 +970,10 @@ public:
   //   1) back_.nextptr(&front_) (i.e., this is the "last" node)
   //   2) &back_ (i.e., this is the "one-past-the-end" sentinel node)
   //
-  iterator end();
+  iterator end()
+  {
+	  return iterator(back_.nextptr(&front_), &back_);
+  }
 
   //
   // begin() const
@@ -925,7 +981,10 @@ public:
   // This code is identical to the non-const begin() except it returns
   // const_iterator instead (i.e., dllist_citer<T>).
   //
-  const_iterator begin() const;
+  const_iterator begin() const
+  {
+	  return const_iterator( &front_, front.nextprt(&back_));
+  }
 
   //
   // begin() const
@@ -933,8 +992,10 @@ public:
   // This code is identical to the non-const begin() except it returns
   // const_iterator instead (i.e., dllist_citer<T>).
   //
-  const_iterator end() const;
-
+  const_iterator end() const
+  {
+	  return const_iterator(back_.nextptr(&front_), &back_);
+  }
   // The next function has been provided for you.
   // NOTE: Why risk error-prone typing? Simply call the appropriate
   //       function! :-)
@@ -961,32 +1022,48 @@ public:
   // Write the SINGLE line of code to return the rvalue constructed
   // std::reverse_iterator.
   //
-  reverse_iterator rbegin();
-
+  reverse_iterator rbegin()
+  {
+	  return std::reverse_iterator(this->end());
+  }
   //
   // rend() is just like rbegin() except that this->begin() is passed
   // to the std::reverse_iterator constructor instead. :-)
   //
-  reverse_iterator rend();
+  reverse_iterator rend()
+  {
+	  return reverse_iterator(this->begin());
+  }
 
   //
   // rbegin() const is the same as rbegin() except the iterator
   // type is now const_reverse_iterator (i.e., dllist_citer<T>).
   //
-  const_reverse_iterator rbegin() const;
+  const_reverse_iterator rbegin() const
+  {
+  	  return const_reverse_iterator(this->end());
+  }
 
   //
   // rend() const is the same as rend() except the iterator
   // type is now const_reverse_iterator (i.e., dllist_citer<T>).
   //
-  const_reverse_iterator rend() const;
+  const_reverse_iterator rend() const
+  {
+	  return const_reverse_iterator(this->begin());
+  }
 
   // crbegin() const returns what begin() const returns.
-  const_reverse_iterator crbegin() const;
+  const_reverse_iterator crbegin() const
+  {
+	  return rbegin();
+  }
 
   // crend() const returns what end() const returns.
-  const_reverse_iterator crend() const;
-
+  const_reverse_iterator crend() const
+  {
+	  return rend();
+  }
   //
   // clear() destroys all elements in the container
   //
@@ -994,7 +1071,11 @@ public:
   //   1) while *this is not empty()
   //      a) call pop_back()
   //
-  void clear();
+  void clear()
+  {
+	  while(!*this.empty())
+		  pop_back();
+  }
 
   // The this->swap(l) function has been provided for you.
   // To understand why all of this work is required to swap, read its
@@ -1112,18 +1193,16 @@ public:
   //
   void push_front(value_type const& v)
   {
-      dllist_node<T>::insert(&back_,&front_,new(v));
-      size_++;
-
+	  dllist_node<T>::insert(&back_, &front_, new dllist_node<T>(v));
+	  ++size_;
   }
 
   // The next function is identical to the previous push_front() function
   // except that v is moved into the dllist_node<T> constructor.
   void push_front(value_type&& v)
   {
-       dllist_node<T>::insert(&back_,&front_,v);
-      size_++;
-
+	  dllist_node<T>::insert(&back_, &front_, new dllist_node<T>(v));
+	  ++size_;
   }
 
   //
@@ -1141,9 +1220,9 @@ public:
   //             empty() == false.
   void pop_front()
   {
-      auto old=dllist_node<T>::remove(&back_,&front);
-      size_--;
-      old==nullptr;
+	  auto old = dllist_node<T>::remove(&back_, &front_);
+	  --size_;
+	  delete old;
   }
 
   //
@@ -1159,24 +1238,20 @@ public:
   //
   void push_back(value_type const& v)
   {
-        dllist_node<T>::insert(&front_,&back_,v);
-       size_++;
-
+	  dllist_node<T>::insert(&front_, &back_, new dllist_node<T>(v));
+	  ++size_;
   }
-  //(DONE ;))
   void push_back(value_type&& v)
   {
-        dllist_node<T>::insert(&front_,&back_,v);
-       size_++;
+	  dllist_node<T>::insert(&front_, &back_, new dllist_node<T>(v));
+	  ++size_;
   }
-  //(DONE ;))
-
   void pop_back()
   {
-        dllist_node<T>::remove(&front_,&back);
-       size_--;
+	  auto old = dllist_node<T>::remove(&front_, &back_);
+	  --size_;
+	  delete old;
   }
-  //(DONE ;))
 
   //
   // emplace(pos, args...)
@@ -1196,13 +1271,11 @@ public:
   template <typename... Args>
   iterator emplace(iterator pos, Args&&... args)
   {
-      auto newnode = new dllist_node<T>{T(std::forward<Args>(args)...)};
-      auto nextnode = dllist_node<T>::insert(pos.prevptr_, pos.nodeptr_, newnode);
-      size_++;
-
-      //don tknow what he meant by c?
-      return iterator(newnode, nextnode);
-      //return nullptr;
+	  --pos;
+	  auto newnode = new dllist_node<T>{T(std::forward<Args>(args)...)};
+	  auto nextnode = dllist_node<T>::insert(pos.prevptr_, pos.nodeptr_, newnode);
+	  ++size_;
+	  return iterator(newnode, nextnode);
   }
 
   // Implement the next SINGLE statement function as follows:
@@ -1212,24 +1285,30 @@ public:
   template <typename... Args>
   void emplace_front(Args&&... args)
   {
-      this->emplace((), std::forward<Args>(args)...);
+	  this->emplace(begin(), std::forward<Args>(args)...);
   }
-  //(DONE ;))
 
   // Implement the next SINGLE statement function as follows:
   //   1) Call this->emplace() with these arguments:
   //      a) end() [i.e., add the new node at the start of the list]
   //      b) std::forward<Args>(args)...
   template <typename... Args>
-  void emplace_front(Args&&... args)
+  void emplace_back(Args&&... args)
   {
-      this->emplace(end(), std::forward<Args>(args)...);
+	  this->emplace(end(), std::forward<Args>(args)...)
   }
-  //(DONE ;))
 
   // This function is identical to emplace() except that args is replaced
   // with value and there is no std::forward or ... stuff.
-  iterator insert(iterator pos, value_type const& value);
+  iterator insert(iterator pos, value_type const& value)
+  {
+	  --pos;
+	  auto newnode = new dllist_node<T>{T(value)};
+	  auto nextnode = dllist_node<T>::insert(pos.prevptr_, pos.nodeptr_, newnode);
+	  ++size_;
+	  return iterator(newnode, nextnode);
+  }
+
   // Implement the insert function as follows:
   //   1) Write a for loop to iterate through the range [first,last).
   //   2) Inside the for loop is the single line of code:
@@ -1239,13 +1318,9 @@ public:
   template <typename InIter>
   void insert(iterator pos, InIter first, InIter const& last)
   {
-
-      for (auto current=first,_e=last;first!=_e; ++current)
-      {
-          pos = insert(pos, *current);
-      }
+	  for(;first!=last; ++first)
+		   pos = insert(pos, *first);
   }
-  //(DONE ;))
 
   // Implement erase() as follows...
   //   1) You need to --pos; to properly erase the desired node.
@@ -1256,14 +1331,12 @@ public:
   //   5) Return pos.
   iterator erase(iterator pos)
   {
-      --pos;
-	  auto oldnode = dllist_node<T>::remove(pos.prevptr_, pos.nodeptr_);
-	  oldnode=nullptr;
-       ++pos;
-	   return pos;
-	  }
-
-	//(DONE ;))
+	  --pos;
+      auto oldnode = dllist_node<T>::remove(pos.prevptr_, pos.nodeptr_);
+	  delete oldnode;
+	  ++pos;
+	  return pos;
+  }
 
   // Implement this erase() function as follows...
   //   1) Write a while loop with the test first != last.
