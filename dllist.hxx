@@ -1395,7 +1395,7 @@ template <typename T>
 inline bool operator <(dllist<T> const& a, dllist<T> const& b)
 {
   using std::lexicographical_compare;
-	return lexicographical_compare();
+	return lexicographical_compare(a, b);
 }
 //(DONE ;))
 // The next function is provided for you. It is defined per the ISO C++ 14
