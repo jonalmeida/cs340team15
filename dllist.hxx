@@ -456,7 +456,7 @@ public:
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using copy construction.
   explicit dllist_node(T const& datum)
-    : dllist_node_ptr_only<T>(nullptr, nullptr), datum_(std::copy(datum)) { }
+    : dllist_node_ptr_only<T>(nullptr, nullptr), datum_(datum) { }
   //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
@@ -474,7 +474,7 @@ public:
   dllist_node(T const& datum,
       dllist_node* prev,
       dllist_node* next)
-    : dllist_node_ptr_only<T>(prev, next), datum_(std::copy(datum)) { }
+    : dllist_node_ptr_only<T>(prev, next), datum_(datum) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -491,7 +491,7 @@ public:
   //   2) Initialize datum_ with datum using copy construction.
   dllist_node(T const& datum,
       xorptr_type const& xp)
-    : dllist_node_ptr_only<T>(xp), datum_(std::copy(datum)) { }
+    : dllist_node_ptr_only<T>(xp), datum_(datum) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -717,7 +717,7 @@ public:
   dllist(std::initializer_list<T> il):
 	dllist{}
   {
-	std::copy(il.begin(), il.end(), std::back_inserter(*this));
+	  std::copy(il.begin(), il.end(), std::back_inserter(*this));
   }
 
 //
@@ -1833,3 +1833,4 @@ inline bool operator !=(dllist_iter<T> const& i, dllist_citer<T> const& j)
 
 // WRITE THE NEEDED PREPROCESSOR STATEMENT HERE!
 #endif
+
