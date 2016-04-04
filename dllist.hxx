@@ -961,7 +961,7 @@ public:
   //
   iterator begin()
   {
-	  return iterator( &front_, front_.nextprt(&back_));
+	  return iterator( &front_, front_.nextptr(&back_));
   }
 
   //
@@ -988,7 +988,7 @@ public:
   //
   const_iterator begin() const
   {
-	  return const_iterator( &front_, front_.nextprt(&back_));
+	  return const_iterator( &front_, front_.nextptr(&back_));
   }
 
   //
