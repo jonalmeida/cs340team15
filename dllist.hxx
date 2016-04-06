@@ -106,7 +106,7 @@ class dllist_citer;     // doubly-linked list const_iterator type
 // appear below to finish writing this class.
 //
 template <typename T>
-class dllist_node_ptr_only
+struct dllist_node_ptr_only
 {
 public:
   using xorptr_type = xorptr<dllist_node_ptr_only>;
@@ -142,13 +142,11 @@ public:
   // The following two constructors must initialize xorptr_ with xp passing
   // xp appropriately (i.e., an rvalue must be moved). No code is allowed
   // to appear within the braces of the constructor body.
-  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only> const& xp)
-  :xorptr_ (xp)
+  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only> const& xp): xorptr_ (xp)
   {
 
   }
-  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only>&& xp)
-  :xorptr_ (std::move(xp))
+  explicit dllist_node_ptr_only(xorptr<dllist_node_ptr_only>&& xp): xorptr_ (std::move(xp))
   {
 
   }
@@ -290,7 +288,7 @@ public:
     dllist_node_ptr_only* newptr
   )
   {
-    xorptr_ = (xorptr_ ^ oldptr) ^ newptr;/* compute (xorptr_ ^ oldptr ^ newptr) here as detailed above */
+    xorptr_ = xorptr_type(xorptr_ ^ oldptr, newptr);/* compute (xorptr_ ^ oldptr ^ newptr) here as detailed above */
   }
 
   //
@@ -308,7 +306,7 @@ public:
   //
   void setptr(dllist_node_ptr_only* ptr1, dllist_node_ptr_only* ptr2)
   {
-    xorptr_ = xorptr_type{ ptr1, ptr2 };
+    this->xorptr_ = xorptr_type{ ptr1, ptr2 };
   }
 
   //
@@ -441,7 +439,7 @@ public:
 // tasks accordingly.
 //
 template <typename T>
-class dllist_node final : dllist_node_ptr_only<T>
+class dllist_node final : public dllist_node_ptr_only<T>
 {
 private:
   T datum_;
@@ -455,8 +453,7 @@ public:
   //   1) "call" the parent type's constructor passing in two nullptr
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using copy construction.
-  explicit dllist_node(T const& datum)
-    : dllist_node_ptr_only<T>(nullptr, nullptr), datum_(datum) { }
+  explicit dllist_node(T const& datum): dllist_node_ptr_only<T>(nullptr, nullptr), datum_(datum) { }
   //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
@@ -464,8 +461,7 @@ public:
   //   1) "call" the parent type's constructor passing in two nullptr
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using move construction.
-  explicit dllist_node(T&& datum)
-    :dllist_node_ptr_only<T>(nullptr,nullptr),datum_(std::move(datum)) { }
+  explicit dllist_node(T&& datum): dllist_node_ptr_only<T>(nullptr,nullptr),datum_(std::move(datum)) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -473,8 +469,7 @@ public:
   //   2) Initialize datum_ with datum using copy construction.
   dllist_node(T const& datum,
       dllist_node* prev,
-      dllist_node* next)
-    : dllist_node_ptr_only<T>(prev, next), datum_(datum) { }
+      dllist_node* next): dllist_node_ptr_only<T>(prev, next), datum_(datum) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -490,16 +485,14 @@ public:
   //   1) "call" the parent type's constructor passing xp values.
   //   2) Initialize datum_ with datum using copy construction.
   dllist_node(T const& datum,
-      xorptr_type const& xp)
-    : dllist_node_ptr_only<T>(xp), datum_(datum) { }
+      xorptr_type const& xp): dllist_node_ptr_only<T>(xp), datum_(datum) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
   //   1) "call" the parent type's constructor passing xp values.
   //   2) Initialize datum_ with datum using move construction.
   dllist_node(T&& datum,
-      xorptr_type const& xp)
-    : dllist_node_ptr_only<T>(xp), datum_(std::move(datum)) { }
+      xorptr_type const& xp): dllist_node_ptr_only<T>(xp), datum_(std::move(datum)) { }
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -507,8 +500,7 @@ public:
   //      it since it is being passed as an rvalue reference.
   //   2) Initialize datum_ with datum using move construction.
   dllist_node(T&& datum,
-      xorptr_type&& xp)
-    : dllist_node_ptr_only<T>(std::move(xp)), datum_(std::move(datum)) { }
+      xorptr_type&& xp): dllist_node_ptr_only<T>(std::move(xp)), datum_(std::move(datum)) { }
 
   // Move constructor...
   // No code can appear inside the next constructor's function body (braces).
@@ -516,8 +508,7 @@ public:
   //   1) "call" the parent type's constructor passing n values by moving
   //      it since it is being passed as an rvalue reference.
   //   2) Initialize datum_ with n's datum using move construction.
-  dllist_node(dllist_node&& n)
-    : dllist_node_ptr_only<T>(std::move(n)), datum_(std::move(n)) { }
+  dllist_node(dllist_node&& n): dllist_node_ptr_only<T>(std::move(n)), datum_(std::move(n)) { }
 
   // Move assignment...
   // Implement the move assignment operator as follows:
@@ -1078,7 +1069,7 @@ public:
   //
   void clear()
   {
-	  while(!*this->empty())
+	  while(!empty())
 		  pop_back();
   }
 
@@ -1182,7 +1173,7 @@ public:
   // push_front(v)
   //
   // Implement this TWO-STATEMENT function as follows:
-  //   1) Call dllist_node<T>::insert() passing in these three arguments:
+  //   1) Call dllist_node_ptr_only<T>::insert() passing in these three arguments:
   //      a) &back_ [sentinel node]
   //      b) &front_ [sentinel node]
   //      c) dynamically allocate a dllist_node<T> with operator new
@@ -1243,17 +1234,17 @@ public:
   //
   void push_back(value_type const& v)
   {
-	  dllist_node<T>::insert(&front_, &back_, new dllist_node<T>(v));
+	  dllist_node_ptr_only<T>::insert(&front_, &back_, new dllist_node<T>(v));
 	  ++size_;
   }
   void push_back(value_type&& v)
   {
-	  dllist_node<T>::insert(&front_, &back_, new dllist_node<T>(std::move(v)));
+	  dllist_node_ptr_only<T>::insert(&front_, &back_, new dllist_node<T>(std::move(v)));
 	  ++size_;
   }
   void pop_back()
   {
-	  auto old = dllist_node<T>::remove(&front_, &back_);
+	  auto old = dllist_node_ptr_only<T>::remove(&front_, &back_);
 	  --size_;
 	  delete old;
   }
@@ -1267,7 +1258,7 @@ public:
   //   2) Write:
   //      auto newnode = new dllist_node<T>{T(std::forward<Args>(args)...)};
   //   3) Write:
-  //      auto nextnode = dllist_node<T>::insert(
+  //      auto nextnode = dllist_node_ptr_only<T>::insert(
   //        pos.prevptr_, pos.nodeptr_, newnode);
   //   4) Increment size_.
   //   5) Return the appropriate constructed iterator type passing in
@@ -1638,8 +1629,8 @@ public:
   {
     auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
     // This seems right vs. the instructions.
-    next_nodeptr_ = nodeptr_;
-    nodeptr_ = prevptr_;
+    prevptr_ = nodeptr_;
+    nodeptr_ = next_nodeptr_;
     return *this;
   }
 
@@ -1663,8 +1654,8 @@ public:
   //   4) return *this  [prefix -- needs to return an lvalue reference]
   dllist_iter& operator --() {
     auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
-    prevptr_ = prev_prevptr_;
     nodeptr_ = prevptr_;
+    prevptr_ = prev_prevptr_;
     return *this;
   }
 
