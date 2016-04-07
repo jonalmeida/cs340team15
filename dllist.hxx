@@ -869,7 +869,7 @@ public:
   void assign(size_type n, value_type const& value)
   {
 	  dllist<T> tmp{n, value};
-	  this->swap();
+	  this->swap(tmp);
   }
 
   //
@@ -883,7 +883,7 @@ public:
   void assign(InIter const& first, InIter const& last)
   {
 	  dllist<T> tmp{first, last};
-	  this->swap();
+	  this->swap(tmp);
   }
 
   //
