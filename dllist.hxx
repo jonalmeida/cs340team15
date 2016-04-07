@@ -1629,8 +1629,8 @@ public:
   {
     auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
     // This seems right vs. the instructions.
-    next_nodeptr_ = nodeptr_;
-    nodeptr_ = prevptr_;
+    prevptr_ = nodeptr_;
+    nodeptr_ = next_nodeptr_;
     return *this;
   }
 
@@ -1654,8 +1654,8 @@ public:
   //   4) return *this  [prefix -- needs to return an lvalue reference]
   dllist_iter& operator --() {
     auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
-    prevptr_ = prev_prevptr_;
     nodeptr_ = prevptr_;
+    prevptr_ = prev_prevptr_;
     return *this;
   }
 
@@ -1772,9 +1772,11 @@ public:
   dllist_citer& operator ++()
   {
     auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
-    next_nodeptr_ = nodeptr_;
     nodeptr_ = prevptr_;
+    next_nodeptr_ = nodeptr_;
+    // TODO: Do I really need to do a static cast to this too?
     return static_cast<dllist_citer&>(*this);
+    //return *this;
   }
   dllist_citer operator ++(int)
   {
@@ -1788,8 +1790,8 @@ public:
   dllist_citer& operator --()
   {
     auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
-    prevptr_ = prev_prevptr_;
     nodeptr_ = prevptr_;
+    prevptr_ = prev_prevptr_;
     return static_cast<dllist_citer&>(*this);
   }
   dllist_citer operator --(int)
