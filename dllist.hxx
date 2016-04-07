@@ -1772,8 +1772,8 @@ public:
   dllist_citer& operator ++()
   {
     auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
-    nodeptr_ = prevptr_;
-    next_nodeptr_ = nodeptr_;
+    prevptr_ = nodeptr_;
+    nodeptr_ = next_nodeptr_;
     // TODO: Do I really need to do a static cast to this too?
     return static_cast<dllist_citer&>(*this);
     //return *this;
