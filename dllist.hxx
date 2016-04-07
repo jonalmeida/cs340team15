@@ -766,7 +766,7 @@ public:
   dllist(dllist&& l)
     : dllist{}
   {
-    this->swap(l);
+    this->swap(std::move(l));
   }
 
   //
@@ -834,7 +834,7 @@ public:
   // except you want to move construct tmp passing in l.
   dllist& operator =(dllist&& l)
   {
-	  dllist<T> tmp{l};
+	  dllist<T> tmp{std::move(l)};
 	  this->swap(tmp);
 	  return *this;
   }
