@@ -38,13 +38,10 @@
 //       file.
 //
 
-// YOU NEED SOMETHING HERE WRT THE PREPROCESSOR
 #ifndef DLLIST_HXX
 #define DLLIST_HXX
 
 //===========================================================================
-
-// WRITE YOUR #include FILES HERE
 
 #include <algorithm>
 #include <iterator>
@@ -454,7 +451,6 @@ public:
   //      values since no pointer values are provided.
   //   2) Initialize datum_ with datum using copy construction.
   explicit dllist_node(T const& datum): dllist_node_ptr_only<T>(nullptr, nullptr), datum_(datum) { }
-  //(DONE ;))
 
   // No code can appear inside the next constructor's function body (braces).
   // Do initialize the class as follows before the opening brace:
@@ -804,7 +800,6 @@ public:
        // do write the catch clause here
      }
   }
-  //(DONE ;))
 
 
   //
@@ -1347,7 +1342,6 @@ public:
 	  return first;
   }
 };
-//(DONE ;))
 
 //===========================================================================
 
@@ -1367,7 +1361,6 @@ inline bool operator ==(dllist<T> const& a, dllist<T> const& b)
 	return std::equal(a, b);
 
 }
-//(DONE ;))
 
 // The next function is provided for you. Notice that it is wise to
 // simply call operator ==() here instead of writing "return !equal(..."...
@@ -1388,7 +1381,6 @@ inline bool operator <(dllist<T> const& a, dllist<T> const& b)
   using std::lexicographical_compare;
 	return lexicographical_compare(a, b);
 }
-//(DONE ;))
 // The next function is provided for you. It is defined per the ISO C++ 14
 // standard document...
 template <typename T>
@@ -1589,15 +1581,14 @@ public:
   {
       return nodeptr_==i.nodeptr_;
   }
-  //(DONE ;))
 
   // Implement the next function by calling operator ==(i) and
   // appropriately manipulating its result.
   bool operator !=(dllist_iter const& i) const
   {
-      return nodeptr_!=i.nodeptr_;
+      return !operator ==(i);
+      //return nodeptr_!=i.nodeptr_;
   }
-  //(DONE ;))
 
   // The next function has been implemented for you.
   // This is unary *, i.e., the indirection (pointer) operator.
@@ -1753,11 +1744,11 @@ public:
   // Write the remaining functions...
   bool operator ==(dllist_citer const& i) const
   {
-    return operator ==(i);
+    return nodeptr_ == i.nodeptr_;
   }
   bool operator !=(dllist_citer const& i) const
   {
-    return operator !=(i);
+    return !operator ==(i);
   }
 
   T const& operator *() const
@@ -1769,32 +1760,28 @@ public:
     return static_cast<T const*>(&nodeptr_->to_node().datum());
   }
 
-  dllist_citer& operator ++()
+  const dllist_citer& operator ++()
   {
-    auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
+	auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
     prevptr_ = nodeptr_;
     nodeptr_ = next_nodeptr_;
-    // TODO: Do I really need to do a static cast to this too?
     return static_cast<dllist_citer&>(*this);
-    //return *this;
   }
-  dllist_citer operator ++(int)
+  const dllist_citer operator ++(int)
   {
-    // TODO: Should I get a dllist_iter<T> and then later static_cast it
-    // before returning?
     dllist_iter<T> tmp{*this};
     tmp++;
     return static_cast<dllist_citer<T>>(tmp);
   }
 
-  dllist_citer& operator --()
+  const dllist_citer& operator --()
   {
     auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
     nodeptr_ = prevptr_;
     prevptr_ = prev_prevptr_;
     return static_cast<dllist_citer&>(*this);
   }
-  dllist_citer operator --(int)
+  const dllist_citer operator --(int)
   {
     dllist_iter<T> tmp{*this};
     tmp--;
@@ -1822,6 +1809,5 @@ inline bool operator !=(dllist_iter<T> const& i, dllist_citer<T> const& j)
 
 //===========================================================================
 
-// WRITE THE NEEDED PREPROCESSOR STATEMENT HERE!
 #endif
 
