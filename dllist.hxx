@@ -766,7 +766,7 @@ public:
   dllist(dllist&& l)
     : dllist{}
   {
-    this->swap(std::move(l));
+    this->swap(l);
   }
 
   //
@@ -834,7 +834,7 @@ public:
   // except you want to move construct tmp passing in l.
   dllist& operator =(dllist&& l)
   {
-	  dllist<T> tmp{std::move(l)};
+	  dllist<T> tmp{l};
 	  this->swap(tmp);
 	  return *this;
   }
@@ -868,7 +868,7 @@ public:
   //
   void assign(size_type n, value_type const& value)
   {
-	  dllist<T> tmp{n, value};
+	  dllist<T> tmp(n, value);
 	  this->swap(tmp);
   }
 
@@ -1747,17 +1747,17 @@ public:
   // (This is based on a requirement by the standard.)
   bool operator !=(dllist_iter<T> const& i) const
   {
-    return !operator ==(i);
+    return nodeptr_ != i.nodeptr_;
   }
 
   // Write the remaining functions...
   bool operator ==(dllist_citer const& i) const
   {
-    return operator ==(i);
+    return nodeptr_ == i.nodeptr_;
   }
   bool operator !=(dllist_citer const& i) const
   {
-    return operator !=(i);
+    return nodeptr_ != i.nodeptr_;
   }
 
   T const& operator *() const
@@ -1769,36 +1769,38 @@ public:
     return static_cast<T const*>(&nodeptr_->to_node().datum());
   }
 
-  dllist_citer& operator ++()
+  const dllist_citer& operator ++()
   {
-    auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
+	auto next_nodeptr_ = nodeptr_->nextptr(prevptr_);
+    // This seems right vs. the instructions.
     prevptr_ = nodeptr_;
     nodeptr_ = next_nodeptr_;
     // TODO: Do I really need to do a static cast to this too?
-    return static_cast<dllist_citer&>(*this);
-    //return *this;
+    //return static_cast<dllist_citer&>(*this);
+    return *this;
   }
-  dllist_citer operator ++(int)
+  const dllist_citer operator ++(int)
   {
     // TODO: Should I get a dllist_iter<T> and then later static_cast it
     // before returning?
     dllist_iter<T> tmp{*this};
     tmp++;
-    return static_cast<dllist_citer<T>>(tmp);
+    //return static_cast<dllist_citer<T>>(tmp);
   }
 
-  dllist_citer& operator --()
+  const dllist_citer& operator --()
   {
     auto prev_prevptr_ = prevptr_->nextptr(nodeptr_);
     nodeptr_ = prevptr_;
     prevptr_ = prev_prevptr_;
-    return static_cast<dllist_citer&>(*this);
+    return *this;
+    //return static_cast<dllist_citer&>(*this);
   }
-  dllist_citer operator --(int)
+  const dllist_citer operator --(int)
   {
     dllist_iter<T> tmp{*this};
     tmp--;
-    return static_cast<dllist_citer>(tmp);
+    //return static_cast<dllist_citer>(tmp);
   }
 };
 
